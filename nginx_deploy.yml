@@ -1,0 +1,58 @@
+- name: Web Sunucusu Kurulumu ve Web Sayfası Dağıtımı
+  hosts: web    
+  become: yes
+
+  tasks:
+    - name: Sistem Paket Listesini Güncelle
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: 80 portunu kullanan servis var mı kontrol et
+      shell: "lsof -i :80 | awk 'NR>1 {print $1}' | sort | uniq"
+      register: port80_services
+      changed_when: false
+
+    - name: Apache 80 portunu kullanıyorsa kaldır
+      apt:
+        name: apache2
+        state: absent
+      when: "'apache2' in port80_services.stdout_lines"
+      ignore_errors: yes
+
+    - name: Daha önce oluşturulan index.html dosyasını sil
+      file:
+        path: /var/www/html/index.html
+        state: absent
+
+    - name: Nginx Web Sunucusunu Kur
+      apt:
+        name: nginx
+        state: present
+
+    - name: Nginx Servisinin Çalıştığından ve Başlangıçta Başladığından Emin Ol
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: İlk VM'ye web-content klasörünü kopyala
+      copy:
+        src: ./web-content/
+        dest: /var/www/html/
+        owner: www-data
+        group: www-data
+        mode: '0644'
+        directory_mode: '0755'
+      when: inventory_hostname == '34.34.20.245'
+
+    - name: İkinci VM'ye web-content2 klasörünü kopyala
+      copy:
+        src: ./web-content2/
+        dest: /var/www/html/
+        owner: www-data
+        group: www-data
+        mode: '0644'
+        directory_mode: '0755'
+      when: inventory_hostname == '34.34.42.236'
+

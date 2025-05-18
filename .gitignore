@@ -1,0 +1,10 @@
+# SSH anahtarları
+ssh
+ssh.pub
+
+# Ansible çalışma dosyaları
+*.retry
+
+.terraform/
+terraform.tfstate
+terraform.tfstate.backup

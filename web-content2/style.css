@@ -1,0 +1,67 @@
+/* style.css */
+
+body {
+    font-family: 'Arial', sans-serif; /* Genel yazı tipi */
+    background-color: #fce4ec; /* Açık pembe arka plan */
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center; /* İçeriği yatayda ortala */
+    align-items: center; /* İçeriği dikeyde ortala */
+    min-height: 100vh; /* Sayfanın en az tam ekran yüksekliğinde olmasını sağla */
+    color: #4a148c; /* Koyu mor yazı rengi */
+}
+
+.container {
+    background-color: #fff; /* Beyaz kutu arka planı */
+    padding: 30px;
+    border-radius: 15px; /* Yuvarlak köşeler */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Hafif gölge */
+    text-align: center; /* İçeriği ortala */
+    width: 90%; /* Genişliği ayarla */
+    max-width: 500px; /* Maksimum genişliği belirle */
+}
+
+h1 {
+    color: #880e4f; /* Daha koyu pembe başlık rengi */
+    margin-bottom: 20px;
+}
+
+button {
+    background-color: #e91e63; /* Canlı pembe buton rengi */
+    color: white; /* Beyaz buton yazısı */
+    border: none;
+    border-radius: 8px; /* Yuvarlak buton köşeleri */
+    padding: 12px 25px;
+    font-size: 1.1em;
+    cursor: pointer; /* Fare imlecini işaretçiye çevir */
+    transition: background-color 0.3s ease; /* Renk değişimine yumuşak geçiş */
+    outline: none; /* Tıklama sonrası çerçeveyi kaldır */
+}
+
+button:hover {
+    background-color: #c2185b; /* Buton üzerine gelindiğinde koyulaş */
+}
+
+button:active {
+    background-color: #880e4f; /* Butona basıldığında daha da koyulaş */
+}
+
+.message-box {
+    margin-top: 25px;
+    padding: 15px;
+    border: 2px solid #f06292; /* Orta ton pembe çerçeve */
+    border-radius: 10px;
+    background-color: #f8bbd0; /* Açık pembe mesaj kutusu arka planı */
+    color: #311b92; /* Koyu mor mesaj yazısı */
+    font-size: 1.2em;
+    min-height: 1.5em; /* Mesaj kutusu için minimum yükseklik */
+    opacity: 0; /* Başlangıçta gizle */
+    transform: translateY(10px); /* Başlangıçta biraz aşağıda olsun */
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out; /* Yumuşak görünme ve hareket animasyonu */
+}
+
+.message-box.visible {
+    opacity: 1; /* Görünür yap */
+    transform: translateY(0); /* Normal konumuna getir */
+}
