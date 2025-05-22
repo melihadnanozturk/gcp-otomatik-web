@@ -8,3 +8,5 @@ ssh.pub
 .terraform/
 terraform.tfstate
 terraform.tfstate.backup
+
+yapilacaklar.txt

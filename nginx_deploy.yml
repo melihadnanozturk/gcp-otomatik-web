@@ -1,58 +1,127 @@
-- name: Web Sunucusu Kurulumu ve Web Sayfası Dağıtımı
-  hosts: web    
+- name: VM1'e quotea web sitesi, app.py ve nginx kurulumu
+  hosts: vm1
   become: yes
-
+  vars:
+    web_root: /opt/quotea
   tasks:
-    - name: Sistem Paket Listesini Güncelle
-      apt:
-        update_cache: yes
-        cache_valid_time: 3600
-
-    - name: 80 portunu kullanan servis var mı kontrol et
-      shell: "lsof -i :80 | awk 'NR>1 {print $1}' | sort | uniq"
-      register: port80_services
-      changed_when: false
-
-    - name: Apache 80 portunu kullanıyorsa kaldır
-      apt:
-        name: apache2
-        state: absent
-      when: "'apache2' in port80_services.stdout_lines"
-      ignore_errors: yes
-
-    - name: Daha önce oluşturulan index.html dosyasını sil
-      file:
-        path: /var/www/html/index.html
-        state: absent
-
-    - name: Nginx Web Sunucusunu Kur
+    - name: Nginx kur
       apt:
         name: nginx
         state: present
+        update_cache: yes
 
-    - name: Nginx Servisinin Çalıştığından ve Başlangıçta Başladığından Emin Ol
-      service:
-        name: nginx
+    - name: quotea klasörünü kopyala
+      copy:
+        src: ./quotea/
+        dest: "{{ web_root }}/"
+        mode: 0755
+
+    - name: app.py için systemd servisi oluştur
+      copy:
+        dest: /etc/systemd/system/quotea-api.service
+        content: |
+          [Unit]
+          Description=Quotea Flask API
+          After=network.target
+
+          [Service]
+          User={{ ansible_user }}
+          WorkingDirectory={{ web_root }}
+          ExecStart=/usr/bin/python3 {{ web_root }}/app.py
+          Restart=always
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Servisi başlat ve enable et
+      systemd:
+        name: quotea-api
         state: started
         enabled: yes
 
-    - name: İlk VM'ye web-content klasörünü kopyala
+    - name: Nginx site konfigürasyonu oluştur
       copy:
-        src: ./web-content/
-        dest: /var/www/html/
-        owner: www-data
-        group: www-data
-        mode: '0644'
-        directory_mode: '0755'
-      when: inventory_hostname == '34.34.20.245'
+        dest: /etc/nginx/sites-available/quotea
+        content: |
+          server {
+              listen 80;
+              server_name _;
+              root {{ web_root }};
+              index index.html;
+              location / {
+                  try_files $uri $uri/ =404;
+              }
+          }
 
-    - name: İkinci VM'ye web-content2 klasörünü kopyala
+    - name: Nginx siteyi etkinleştir
+      file:
+        src: /etc/nginx/sites-available/quotea
+        dest: /etc/nginx/sites-enabled/quotea
+        state: link
+        force: yes
+
+    - name: Varsayılan nginx sitesini kaldır
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+
+    - name: Nginx'i yeniden başlat
+      service:
+        name: nginx
+        state: restarted
+
+- name: VM2'ye quotea web sitesi ve nginx kurulumu
+  hosts: vm2
+  become: yes
+  vars:
+    web_root: /opt/quotea
+    vm1_internal_ip: 10.164.0.11  # VM1'in internal IP'si
+  tasks:
+    - name: Nginx kur
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: quotea klasörünü kopyala
       copy:
-        src: ./web-content2/
-        dest: /var/www/html/
-        owner: www-data
-        group: www-data
-        mode: '0644'
-        directory_mode: '0755'
-      when: inventory_hostname == '34.34.42.236'
+        src: ./quotea/
+        dest: "{{ web_root }}/"
+        mode: 0755
 
+    - name: scripts.js dosyasında fetch'i VM1 IP'sine göre ayarla
+      replace:
+        path: "{{ web_root }}/scripts.js"
+        regexp: "fetch\\('.*?/api/sentences'\\)"
+        replace: "fetch('http://{{ vm1_internal_ip }}:5000/api/sentences')"
+
+    - name: Nginx site konfigürasyonu oluştur
+      copy:
+        dest: /etc/nginx/sites-available/quotea
+        content: |
+          server {
+              listen 80;
+              server_name _;
+              root {{ web_root }};
+              index index.html;
+              location / {
+                  try_files $uri $uri/ =404;
+              }
+          }
+
+    - name: Nginx siteyi etkinleştir
+      file:
+        src: /etc/nginx/sites-available/quotea
+        dest: /etc/nginx/sites-enabled/quotea
+        state: link
+        force: yes
+
+    - name: Varsayılan nginx sitesini kaldır
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+
+    - name: Nginx'i yeniden başlat
+      service:
+        name: nginx
+        state: restarted
