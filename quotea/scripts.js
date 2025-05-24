@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', async function() {
   const container = document.getElementById('sentences');
   try {
-    const res = await fetch('http://localhost:5000/api/sentences');
+    const res = await fetch('http://localhost:5757/api/sentences');
     const data = await res.json();
     container.innerHTML = '';
     data.forEach(item => {

@@ -1,0 +1,11 @@
+- name: Sadece quotea klasörünü tekrar kopyala
+  hosts: vm1
+  become: yes
+  vars:
+    web_root: /opt/quotea
+  tasks:
+    - name: quotea klasörünü kopyala
+      copy:
+        src: ./quotea/
+        dest: "{{ web_root }}/"
+        mode: 0755
