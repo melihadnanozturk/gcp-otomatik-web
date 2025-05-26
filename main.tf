@@ -168,18 +168,6 @@ resource "google_compute_firewall" "allow_internal" {
   target_tags   = ["webserver"]
 }
 
-resource "google_compute_firewall" "allow_internal_app" {
-  name    = "allow-internal-app"
-  network = "default"
-  allow {
-    protocol = "tcp"
-    ports    = ["5000"]
-  }
-  source_tags   = ["webserver"]
-  target_tags   = ["webserver"]
-  source_ranges = ["10.128.0.0/9"]
-}
-
 resource "google_compute_firewall" "allow_lb_http" {
   name    = "allow-lb-http"
   network = "default"
@@ -191,18 +179,7 @@ resource "google_compute_firewall" "allow_lb_http" {
   target_tags   = ["lb-backend"]
 }
 
-resource "google_compute_firewall" "allow_internal_backend" {
-  name    = "allow-internal-backend"
-  network = "default"
-  allow {
-    protocol = "tcp"
-    ports    = ["5000"]
-  }
-  source_tags = ["lb-backend"]
-  target_tags = ["lb-backend"]
-}
-
-resource "google_compute_firewall" "allow_ssh_only_vm1" {
+resource "google_compute_firewall" "allow_ssh_only" {
   name    = "allow-ssh-only-vm1"
   network = "default"
   allow {
