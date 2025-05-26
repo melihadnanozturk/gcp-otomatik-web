@@ -5,22 +5,6 @@
     web_root: /opt/quotea
     vm1_backend_ip: 10.164.0.15  # VM1'in iç ağ IP adresi
   tasks:
-    - name: Python3 ve pip kur
-      apt:
-        name:
-          - python3
-          - python3-pip
-        state: present
-        update_cache: yes
-
-    - name: Gerekli Python paketlerini kur
-      pip:
-        name:
-          - flask
-          - flask-cors
-          - psycopg2-binary
-        executable: pip3
-
     - name: Nginx kur
       apt:
         name: nginx
@@ -32,30 +16,7 @@
         src: ./quotea/
         dest: "{{ web_root }}/"
         mode: 0755
-
-    - name: app.py için systemd servisi oluştur
-      copy:
-        dest: /etc/systemd/system/quotea-api.service
-        content: |
-          [Unit]
-          Description=Quotea Flask API
-          After=network.target
-
-          [Service]
-          User=adnan@white-takke-home
-          WorkingDirectory={{ web_root }}
-          ExecStart=/usr/bin/python3 {{ web_root }}/app.py
-          Restart=always
-
-          [Install]
-          WantedBy=multi-user.target
-
-    - name: Servisi başlat ve enable et
-      systemd:
-        name: quotea-api
-        state: started
-        enabled: yes
-
+        
     - name: Nginx site konfigürasyonu oluştur
       copy:
         dest: /etc/nginx/sites-available/quotea
