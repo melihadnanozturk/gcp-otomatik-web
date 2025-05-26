@@ -3,7 +3,7 @@
   become: yes
   vars:
     web_root: /opt/quotea
-    vm1_backend_ip: 10.164.0.15  # VM1'in iç ağ IP adresi (güncellendi)
+    vm1_backend_ip: 10.164.0.15  # VM1'in iç ağ IP adresi
   tasks:
     - name: Python3 ve pip kur
       apt:
